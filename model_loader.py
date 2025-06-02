@@ -1,22 +1,28 @@
 # model_loader.py
-from transformers import pipeline
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
 
 # Define available models
-MODEL_OPTIONS = {
-    "DistilBERT (Sentiment)": "distilbert-base-uncased-finetuned-sst-2-english",
-    "RoBERTa (Sentiment)": "cardiffnlp/twitter-roberta-base-sentiment",
-    # Add more models if needed
+MODEL_REGISTRY = {
+    "Sentiment Analysis": "cardiffnlp/twitter-roberta-base-sentiment",
+    "Spam Detection": "mrm8488/bert-tiny-finetuned-sms-spam-detection",
+    "Topic Classification": "textattack/distilbert-base-uncased-ag-news"
 }
 
 # Cache loaded models
-loaded_models = {}
+loaded_pipeline = {}
 
-def get_model(model_name):
-    if model_name not in loaded_models:
-        model_id = MODEL_OPTIONS[model_name]
-        loaded_models[model_name] = pipeline("sentiment-analysis", model=model_id)
-    return loaded_models[model_name]
+def get_pipeline(task_name):
+    if task_name not in MODEL_REGISTRY:
+        raise ValueError(f"Model '{task_name}' is not available. Available models: {list(MODEL_REGISTRY.keys())}")
+    if task_name in loaded_pipeline:
+        return loaded_pipeline[task_name]
+    model_id = MODEL_REGISTRY[task_name]
+    tokenizer = AutoTokenizer.from_pretrained(model_id)
+    model = AutoModelForSequenceClassification.from_pretrained(model_id)
 
-for model_name in MODEL_OPTIONS:
-    get_model(model_name)  
-    print(f"Model '{model_name}' loaded successfully.")
+    pipe = pipeline("text-classification", model=model, tokenizer=tokenizer, return_all_scores=False)
+    loaded_pipeline[task_name] = pipe
+    return pipe
+    
+def get_available_models():
+    return list(MODEL_REGISTRY.keys())

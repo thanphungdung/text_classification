@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Text Classifier</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 900px;
+      margin: 30px auto;
+      padding: 20px;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    select, textarea, input[type="file"], button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      font-size: 16px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 30px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background: #f4f4f4;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:disabled {
+      background: #aaa;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Text Classification Web App</h2>
+
+  <form id="classifier-form">
+    <label for="task">Select Task</label>
+    <select id="task" name="task_name">
+      <option value="Sentiment Analysis">Sentiment Analysis</option>
+      <option value="Spam Detection">Spam Detection</option>
+      <option value="Topic Classification">Topic Classification</option>
+    </select>
+
+    <label for="text_input">Enter Text</label>
+    <textarea id="text_input" name="text_input" rows="5" placeholder="Paste or type your text here..."></textarea>
+
+    <label for="files">Upload Files (max 4)</label>
+    <input type="file" id="files" name="files" multiple accept=".txt,.pdf,.csv"/>
+
+    <button type="submit">Submit</button>
+  </form>
+
+  <table id="results-table" style="display:none;">
+    <thead>
+      <tr>
+        <th>Source</th>
+        <th>Text</th>
+        <th>Label</th>
+        <th>Confidence</th>
+        <th>Message</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const form = document.getElementById('classifier-form');
+    const table = document.getElementById('results-table');
+    const tbody = table.querySelector('tbody');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      tbody.innerHTML = "";
+      table.style.display = "none";
+
+      const formData = new FormData();
+      formData.append('task_name', document.getElementById('task').value);
+      formData.append('text_input', document.getElementById('text_input').value);
+
+      const files = document.getElementById('files').files;
+      Array.from(files).slice(0, 4).forEach(file => {
+        formData.append('files', file);
+      });
+
+      const res = await fetch('/api/classify', {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await res.json();
+
+      if (Array.isArray(data)) {
+        data.forEach(row => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${row.source_file}</td>
+            <td>${row.text}</td>
+            <td>${row.label}</td>
+            <td>${row.confidence}%</td>
+            <td>${row.message}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+        table.style.display = "table";
+      } else {
+        alert("Error: " + JSON.stringify(data));
+      }
+    });
+  </script>
+</body>
+</html>
