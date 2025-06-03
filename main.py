@@ -6,7 +6,8 @@ import os
 import uuid
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-
+from typing import List
+from fastapi import UploadFile, File
 from classifier import classify_text_and_files
 
 app = FastAPI()
@@ -30,7 +31,7 @@ def read_root():
 async def classify(
     task_name: str = Form(...),
     text_input: str = Form(""),
-    files: list[UploadFile] = File(default=[])
+    files: List[UploadFile] = File(default=[])
 ):
     # Limit to 4 files
     if len(files) > 4:

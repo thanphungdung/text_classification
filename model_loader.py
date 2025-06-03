@@ -3,9 +3,9 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipe
 
 # Define available models
 MODEL_REGISTRY = {
-    "Sentiment Analysis": "cardiffnlp/twitter-roberta-base-sentiment",
+    "Sentiment Analysis": "siebert/sentiment-roberta-large-english",
     "Spam Detection": "mrm8488/bert-tiny-finetuned-sms-spam-detection",
-    "Topic Classification": "textattack/distilbert-base-uncased-ag-news"
+    "Topic Classification": "valurank/distilroberta-topic-classification"
 }
 
 # Cache loaded models
@@ -20,7 +20,7 @@ def get_pipeline(task_name):
     tokenizer = AutoTokenizer.from_pretrained(model_id)
     model = AutoModelForSequenceClassification.from_pretrained(model_id)
 
-    pipe = pipeline("text-classification", model=model, tokenizer=tokenizer, return_all_scores=False)
+    pipe = pipeline("text-classification", model=model, tokenizer=tokenizer, return_all_scores=True)
     loaded_pipeline[task_name] = pipe
     return pipe
     

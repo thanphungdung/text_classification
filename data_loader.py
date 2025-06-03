@@ -1,12 +1,6 @@
 import pandas as pd
 import re
-#from langchain_community.document_loaders import PyPDFLoader
 
-def load_pdf(file_path):
-    # loader = PyPDFLoader(file_path)
-    # documents = loader.load()
-    # return documents
-    return [{"page_content": "PDF reading temporarily disabled"}]
 
 
 def load_csv_safely(file_path):
