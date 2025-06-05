@@ -94,7 +94,13 @@
       formData.append('task_name', document.getElementById('task').value);
       formData.append('text_input', document.getElementById('text_input').value);
 
-      const files = document.getElementById('files').files;
+      const fileInput = document.getElementById("files");
+      const files = fileInput.files;
+
+      if (files.length > 4) {
+        alert("Please select up to 4 files only.");
+        return;
+      }
       Array.from(files).slice(0, 4).forEach(file => {
         formData.append('files', file);
       });

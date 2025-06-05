@@ -45,7 +45,7 @@ async def classify(
             temp_path = os.path.join(UPLOAD_DIR, f"{uuid.uuid4()}{suffix}")
             with open(temp_path, "wb") as f:
                 shutil.copyfileobj(file.file, f)
-            file_paths.append(temp_path)
+            file_paths.append((temp_path, file.filename))
 
         # Call classifier
         df = classify_text_and_files(text_input, file_paths, task_name)
@@ -57,5 +57,6 @@ async def classify(
     finally:
         # Clean up uploaded files
         for path in file_paths:
-            if os.path.exists(path):
-                os.remove(path)
+            for path, _ in file_paths:
+                if os.path.exists(path):
+                    os.remove(path)
